@@ -7,7 +7,7 @@ from peft import (
     LoraConfig,
     get_peft_model,
     get_peft_model_state_dict,
-    prepare_model_for_int8_training,
+    prepare_model_for_kbit_training,
     set_peft_model_state_dict,
 )
 from transformers import GenerationConfig, LlamaForCausalLM, LlamaTokenizer, LlamaConfig
@@ -32,11 +32,11 @@ def convert_params_to_float32(model):
                 param.data = param.data.float()
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-whisper_text_model = whisper_at.load_model("large-v2", device='cuda:1')
+whisper_text_model = whisper_at.load_model("large-v2", device='cuda:0')
 
 def load_whisper():
     mdl_size = 'large-v1'
-    checkpoint_path = '../../pretrained_mdls/{:s}.pt'.format(mdl_size)
+    checkpoint_path = '/n/holyscratch01/glassman_lab/Users/zhentingqi/my_projects/audio/pretrained_mdls/{:s}.pt'.format(mdl_size)
     checkpoint = torch.load(checkpoint_path, map_location='cuda:0')
     dims = ModelDimensions(**checkpoint["dims"])
     whisper_feat_model = Whisper(dims)
@@ -46,10 +46,10 @@ def load_whisper():
 whisper_feat_model = load_whisper()
 
 # do not change this, this will load llm
-base_model = "../../pretrained_mdls/vicuna_ltuas/"
+base_model = "/n/holyscratch01/glassman_lab/Users/zhentingqi/my_projects/audio/pretrained_mdls/vicuna_ltuas/"
 prompt_template = "alpaca_short"
 # change this to your checkpoint
-eval_mdl_path = '../../pretrained_mdls/ltuas_long_noqa_a6.bin'
+eval_mdl_path = '/n/holyscratch01/glassman_lab/Users/zhentingqi/my_projects/audio/pretrained_mdls/ltuas_long_noqa_a6.bin'
 eval_mode = 'joint'
 prompter = Prompter(prompt_template)
 tokenizer = LlamaTokenizer.from_pretrained(base_model)
